@@ -68,10 +68,11 @@ public class GeneticAlgorithm : MonoBehaviour
         int index = Random.Range(0, positions.Count);
         foreach(Vector2Int position in positions)
         {           
-            if (index-- == 0)
+            if (index == 0)
             {
                 return position;
             }
+            index--;
         }
         return default;
     }
@@ -104,7 +105,6 @@ public class GeneticAlgorithm : MonoBehaviour
             GeneticAgent secondChild = CreateChild(parent1, parent2);
             newGeneration.Add(firstChild);
             newGeneration.Add(secondChild);
-            Debug.Log("Ogarniete");
         }
         agents.AddRange(newGeneration);
     }
@@ -116,7 +116,6 @@ public class GeneticAlgorithm : MonoBehaviour
         childWolf.MutateGenes(mutationChance);
         childWolf.EvaluateFitness();
         firstWolf.transform.position = SetPosition(firstWolf);
-        Debug.Log(firstWolf.transform.position);
         return childWolf;
 
     }
