@@ -12,16 +12,15 @@ public class GeneticAlgorithm : MonoBehaviour
     [SerializeField]
     private GameObject wolfPrefab;
     [SerializeField]
-    private float mutationChance = 0.1f;
     private GridManager gridManager;
     private float timer = 0f;
     private float interval = 10f;
+    [SerializeField]
+    private float mutationChance = 0.1f;
     private SortedSet<Vector2Int> positions = new SortedSet<Vector2Int>(new Vector2IntComparer()); 
-    private int index = 0;
 
     private void Start()
     {
-        gridManager = Object.FindFirstObjectByType<GridManager>();
         AddPositions();
         InitializePopulation();
     }
@@ -41,7 +40,7 @@ public class GeneticAlgorithm : MonoBehaviour
         {           
             GameObject wolf = Instantiate(wolfPrefab);
             GeneticAgent agent = wolf.GetComponent<GeneticAgent>();
-            wolf.transform.position = SetPosition(wolf);
+            wolf.transform.position = SetPosition();
             agent.RandomizeGenes();           
             agent.EvaluateFitness();
             agents.Add(agent);
@@ -57,20 +56,15 @@ public class GeneticAlgorithm : MonoBehaviour
             }
         }
     }
-    private Vector3 SetPosition(GameObject wolf)
-    {
-        Vector2Int position = GetRandomPosition();
-        positions.Remove(position);
-        return gridManager.Grid.CellToWorld(new Vector3Int(position.x, 0, position.y));
-    }
-    private Vector2Int GetRandomPosition()
+    private Vector3 SetPosition()
     {
         int index = Random.Range(0, positions.Count);
-        foreach(Vector2Int position in positions)
-        {           
+        foreach (Vector2Int position in positions)
+        {
             if (index == 0)
             {
-                return position;
+                positions.Remove(position);
+                return gridManager.Grid.CellToWorld(new Vector3Int(position.x, 0, position.y));
             }
             index--;
         }
@@ -83,23 +77,25 @@ public class GeneticAlgorithm : MonoBehaviour
             agent.EvaluateFitness();
         }
     }
-    private List<GeneticAgent> SelectParents()
+    private void SelectParents()
     {
         agents.Sort((a, b) => b.Fitness.CompareTo(a.Fitness));
+
         int bestHalfAgentsCount = agents.Count / 2;
-        RemoveWolves(bestHalfAgentsCount);
-        return new List<GeneticAgent>(agents);
+        for (int i = bestHalfAgentsCount; i < agents.Count; i++)
+        {
+            RemoveWolves(i);
+        }
     }
     private void Crossover()
     {
         List<GeneticAgent> newGeneration = new List<GeneticAgent>();
-        List<GeneticAgent> selectedParents = SelectParents();
-        int childrenToCreate = selectedParents.Count / 2;
+        SelectParents();
+        int childrenToCreate = agents.Count / 2;
         for (int i = 0; i < childrenToCreate; i++)
         {
-            if (selectedParents.Count < 2) break;
-            GeneticAgent parent1 = SelectParentFromPool(selectedParents);
-            GeneticAgent parent2 = SelectParentFromPool(selectedParents);
+            GeneticAgent parent1 = SelectParentFromPool();
+            GeneticAgent parent2 = SelectParentFromPool();
 
             GeneticAgent firstChild = CreateChild(parent1, parent2);
             GeneticAgent secondChild = CreateChild(parent1, parent2);
@@ -113,47 +109,36 @@ public class GeneticAlgorithm : MonoBehaviour
         GameObject firstWolf = Instantiate(wolfPrefab);
         GeneticAgent childWolf = firstWolf.GetComponent<GeneticAgent>();
         childWolf.InheritGenes(firstParent, secondParent);
-        childWolf.MutateGenes(mutationChance);
+        childWolf.MutateGenes();
         childWolf.EvaluateFitness();
-        firstWolf.transform.position = SetPosition(firstWolf);
+        firstWolf.transform.position = SetPosition();
         return childWolf;
-
     }
-    private GeneticAgent SelectParentFromPool(List<GeneticAgent> parentsPool)
+    private GeneticAgent SelectParentFromPool()
     {
-        if (parentsPool.Count == 0)
-        {
-            throw new System.InvalidOperationException("Parents pool is empty. Cannot select a parent.");
-        }
-
-        int randomIndex = Random.Range(0, parentsPool.Count);
-        GeneticAgent selectedParent = parentsPool[randomIndex];
-        parentsPool.RemoveAt(randomIndex);
+        int randomIndex = Random.Range(0, agents.Count);
+        GeneticAgent selectedParent = agents[randomIndex];
+        agents.RemoveAt(randomIndex);
         return selectedParent;
     }
     private void Mutate()
     {
         foreach (GeneticAgent agent in agents)
         {
-            agent.MutateGenes(mutationChance);
+            if(Random.Range(0f, 1f) < mutationChance)
+            {
+                agent.MutateGenes();
+            }
         }
     }
-    private void RemoveWolves(int count)
-    {
-        agents.Sort((a, b) => b.Fitness.CompareTo(a.Fitness));
-
-        for (int i = 0; i < count; i++)
-        {
-            if (agents.Count == 0) break;
-
-            Vector3 worldPosition = agents[agents.Count - 1].transform.position;
-            Vector3Int gridPosition = gridManager.Grid.WorldToCell(worldPosition);
-            Vector2Int position = new Vector2Int(gridPosition.x, gridPosition.z);
-            Destroy(agents[agents.Count - 1].gameObject);
-            agents.RemoveAt(agents.Count - 1);
-            positions.Add(position);
-        }
-
+    private void RemoveWolves(int index)
+    {      
+        Vector3 worldPosition = agents[index].transform.position;
+        Vector3Int gridPosition = gridManager.Grid.WorldToCell(worldPosition);
+        Vector2Int position = new Vector2Int(gridPosition.x, gridPosition.z);
+        Destroy(agents[index].gameObject);
+        agents.RemoveAt(index);
+        positions.Add(position);       
     }
     private void NextEpoch()
     {
@@ -174,5 +159,3 @@ public class GeneticAlgorithm : MonoBehaviour
     }
 }
 
-//TO DO: HashSet na SortedSet 
-//TO DO: RemoveWolves usuwa jednego pojedynczego wilka, a selectParent polowe

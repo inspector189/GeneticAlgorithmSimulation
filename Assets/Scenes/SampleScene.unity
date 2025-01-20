@@ -200,6 +200,7 @@ MonoBehaviour:
   populationSize: 100
   epochsNum: 10
   wolfPrefab: {fileID: 1224259430}
+  gridManager: {fileID: 285281825}
   mutationChance: 0.1
 --- !u!4 &364876938
 Transform:

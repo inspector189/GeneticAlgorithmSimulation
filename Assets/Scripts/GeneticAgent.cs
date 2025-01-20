@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class GeneticAgent : MonoBehaviour
@@ -7,15 +9,13 @@ public class GeneticAgent : MonoBehaviour
     [SerializeField]
     private List<Gene> genes;
     [SerializeField]
-    private int numGenes = 5;
-    [SerializeField]
     private GameObject wolfPrefab;
 
     [field: SerializeField]
     public float Fitness { get; private set; } = 0;
     private void Start()
     {
-        Color randomColor = new Color(Random.value, Random.value, Random.value);
+        Color randomColor = new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
         Renderer wolfRenderer = this.GetComponent<Renderer>();
         wolfRenderer.material.color = randomColor;
     }
@@ -28,7 +28,7 @@ public class GeneticAgent : MonoBehaviour
     {
         foreach(Gene gene in genes)
         {
-            gene.CurrentValue = Random.Range(gene.getMin(), gene.getMax() + 1);
+            gene.CurrentValue = UnityEngine.Random.Range(gene.getMin(), gene.getMax() + 1);
         }
     }
     public void InheritGenes(GeneticAgent parent1, GeneticAgent parent2)
@@ -44,15 +44,22 @@ public class GeneticAgent : MonoBehaviour
             genes.Add(parent2.genes[i]);
         }
     }
-    public void MutateGenes(float mutationChance)
+    public void MutateGenes()
     {
         System.Random rand = new System.Random();
-        foreach(Gene gene in genes)
+        List<int> indexesArray = Enumerable.Range(0, genes.Count).ToList();
+        int numRandomGenes = UnityEngine.Random.Range(0, 3);
+        for(int i = 0; i < numRandomGenes; i++)
         {
-            if(Random.Range(0f, 1f) < mutationChance)
-            {
-                gene.CurrentValue = rand.Next(gene.getMin(), gene.getMax());
-            }
+            int randomIndex = rand.Next(0, indexesArray.Count);
+            int geneIndex = indexesArray[randomIndex];
+            int currentValue = genes[geneIndex].CurrentValue;
+            double tenPercent = genes[geneIndex].getMax() * 0.1;
+            int randomChange = rand.Next((int)(-tenPercent), (int)(tenPercent));
+            currentValue = Math.Max(genes[geneIndex].getMin(), Math.Min(currentValue + randomChange, genes[geneIndex].getMax()));
+            genes[geneIndex].CurrentValue = currentValue;
+            indexesArray.RemoveAt(randomIndex);
         }
     }
 }
+//Math.Max(Math.Min(currentValue));
