@@ -47,8 +47,9 @@ public class GeneticAgent : MonoBehaviour
     public void MutateGenes()
     {
         System.Random rand = new System.Random();
+        int maxNumRandomGenes = 3;
         List<int> indexesArray = Enumerable.Range(0, genes.Count).ToList();
-        int numRandomGenes = UnityEngine.Random.Range(0, 3);
+        int numRandomGenes = UnityEngine.Random.Range(0, maxNumRandomGenes);
         for(int i = 0; i < numRandomGenes; i++)
         {
             int randomIndex = rand.Next(0, indexesArray.Count);

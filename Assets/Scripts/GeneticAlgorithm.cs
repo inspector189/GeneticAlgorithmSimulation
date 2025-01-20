@@ -14,23 +14,32 @@ public class GeneticAlgorithm : MonoBehaviour
     [SerializeField]
     private GridManager gridManager;
     private float timer = 0f;
-    private float interval = 10f;
     [SerializeField]
     private float mutationChance = 0.1f;
-    private SortedSet<Vector2Int> positions = new SortedSet<Vector2Int>(new Vector2IntComparer()); 
+    [SerializeField]
+    private float actionTime = 5f;
+    [SerializeField]
+    private int numberActions = 5;
+    private SortedSet<Vector2Int> positions = new SortedSet<Vector2Int>(new Vector2IntComparator()); 
 
     private void Start()
     {
         AddPositions();
         InitializePopulation();
+        StartCoroutine(StartEpochs());
     }
-    private void Update()
+    private IEnumerator StartEpochs()
     {
-        timer += Time.deltaTime;
-        if(timer >= interval && epochsNum > 0)
+        while (true)
         {
+            for(int i = 0; i < numberActions; i++)
+            {
+                Debug.Log("Numer wykonywanej akcji: " + i);
+                StartWolfAction(actionTime);
+                yield return new WaitForSeconds(actionTime);
+            }
             NextEpoch();
-            timer = 0f;
+            Debug.Log("Następna epoka liczba agentów: " + agents.Count);
         }
     }
     private void InitializePopulation()
@@ -77,25 +86,28 @@ public class GeneticAlgorithm : MonoBehaviour
             agent.EvaluateFitness();
         }
     }
-    private void SelectParents()
+    private void SelectParents(List<GeneticAgent> parents)
     {
         agents.Sort((a, b) => b.Fitness.CompareTo(a.Fitness));
 
         int bestHalfAgentsCount = agents.Count / 2;
         for (int i = bestHalfAgentsCount; i < agents.Count; i++)
         {
-            RemoveWolves(i);
+            RemoveWolf(i);
         }
+        parents.AddRange(agents);
     }
     private void Crossover()
     {
+        Debug.Log("CrossOver rozpoczety!");
         List<GeneticAgent> newGeneration = new List<GeneticAgent>();
-        SelectParents();
+        List<GeneticAgent> parents = new List<GeneticAgent>();
+        SelectParents(parents);
         int childrenToCreate = agents.Count / 2;
         for (int i = 0; i < childrenToCreate; i++)
         {
-            GeneticAgent parent1 = SelectParentFromPool();
-            GeneticAgent parent2 = SelectParentFromPool();
+            GeneticAgent parent1 = SelectParentFromPool(parents);
+            GeneticAgent parent2 = SelectParentFromPool(parents);
 
             GeneticAgent firstChild = CreateChild(parent1, parent2);
             GeneticAgent secondChild = CreateChild(parent1, parent2);
@@ -114,24 +126,27 @@ public class GeneticAlgorithm : MonoBehaviour
         firstWolf.transform.position = SetPosition();
         return childWolf;
     }
-    private GeneticAgent SelectParentFromPool()
+    private GeneticAgent SelectParentFromPool(List<GeneticAgent> selectedParents)
     {
-        int randomIndex = Random.Range(0, agents.Count);
-        GeneticAgent selectedParent = agents[randomIndex];
-        agents.RemoveAt(randomIndex);
+        int randomIndex = Random.Range(0, selectedParents.Count);
+        GeneticAgent selectedParent = selectedParents[randomIndex];
+        selectedParents.RemoveAt(randomIndex);
         return selectedParent;
     }
     private void Mutate()
     {
+        int counter = 0;
         foreach (GeneticAgent agent in agents)
         {
             if(Random.Range(0f, 1f) < mutationChance)
             {
                 agent.MutateGenes();
+                counter++;
             }
         }
+        Debug.Log("Liczba zmutowanych osobników: " + counter);
     }
-    private void RemoveWolves(int index)
+    private void RemoveWolf(int index)
     {      
         Vector3 worldPosition = agents[index].transform.position;
         Vector3Int gridPosition = gridManager.Grid.WorldToCell(worldPosition);
@@ -144,9 +159,17 @@ public class GeneticAlgorithm : MonoBehaviour
     {
         WolvesFitness();
         Crossover();
+        Mutate();
         epochsNum--;
     }
-    public class Vector2IntComparer : IComparer<Vector2Int>
+    private void StartWolfAction(float actionTime)
+    {
+        foreach(GeneticAgent agent in agents)
+        {
+           agent.GetComponent<Wolf>().StartAction(actionTime);
+        }
+    }
+    public class Vector2IntComparator : IComparer<Vector2Int>
     {
         public int Compare(Vector2Int a, Vector2Int b)
         {
@@ -159,3 +182,10 @@ public class GeneticAlgorithm : MonoBehaviour
     }
 }
 
+/*
+ 1. Wilk moze isc w miejsce gdzie ma movementRange - szukamy zakresu np do 2 (czyli 1, 2)
+ 2. Movemnt Order - jezeli dane pole jest wolne i dwa wilki chca na nie sie dostac to sprawdzamy ktory ma wiekszy ten movementOrder
+ 3. UI  - przyspieszenie czasu
+ 4. Bug - liczba agentow sie chb nie zgadza
+ 5. ten prefab
+ */
