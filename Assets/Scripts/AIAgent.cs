@@ -27,7 +27,7 @@ public class AIAgent : MonoBehaviour
         if (gridManager != null)
         {
             Vector3Int newPosition = gridManager.Grid.WorldToCell(transform.position + new Vector3(direction.x, 0, direction.y));
-            Vector2Int newPosVec2 = new Vector2Int(newPosition.x, newPosition.z);
+            Vector2Int newPosVec2 = new(newPosition.x, newPosition.z);
             if (gridManager.IsPositionEmpty(newPosVec2))
             {
                 gridManager.UpdateObjectOnGrid(this, newPosVec2);

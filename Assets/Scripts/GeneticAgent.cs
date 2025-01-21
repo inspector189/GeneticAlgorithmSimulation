@@ -15,7 +15,7 @@ public class GeneticAgent : MonoBehaviour
     public float Fitness { get; private set; } = 0;
     private void Start()
     {
-        Color randomColor = new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
+        Color randomColor = new(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
         Renderer wolfRenderer = this.GetComponent<Renderer>();
         wolfRenderer.material.color = randomColor;
     }
@@ -46,7 +46,7 @@ public class GeneticAgent : MonoBehaviour
     }
     public void MutateGenes()
     {
-        System.Random rand = new System.Random();
+        System.Random rand = new();
         int maxNumRandomGenes = 3;
         List<int> indexesArray = Enumerable.Range(0, genes.Count).ToList();
         int numRandomGenes = UnityEngine.Random.Range(0, maxNumRandomGenes);
@@ -62,5 +62,17 @@ public class GeneticAgent : MonoBehaviour
             indexesArray.RemoveAt(randomIndex);
         }
     }
+    public int GetMovementRangeValue()
+    {
+        System.Random random = new();
+        foreach(Gene gene in genes)
+        {
+            if(gene.Name == "Movement Range")
+            {
+                Debug.Log(random.Next(gene.Min, gene.CurrentValue + 1));
+                return random.Next(gene.Min, gene.CurrentValue + 1);
+            }
+        }
+        return 1;
+    }
 }
-//Math.Max(Math.Min(currentValue));

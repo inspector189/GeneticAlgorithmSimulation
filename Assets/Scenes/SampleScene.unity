@@ -197,7 +197,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37a9d74e1c317924c8dea3756c95ff45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  populationSize: 4
+  populationSize: 10
   epochsNum: 10
   wolfPrefab: {fileID: 1224259430}
   gridManager: {fileID: 285281825}
@@ -398,13 +398,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalRotation: {x: 0.13849168, y: -0.045491885, z: 0.0063684005, w: 0.98929775}
+  m_LocalPosition: {x: 1.48, y: 3.75, z: -13.54}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 15.938, y: -5.266, z: 0}
 --- !u!1 &1224259430 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5555189013796131144, guid: 131bc3967c6be7347b02963652a75260, type: 3}

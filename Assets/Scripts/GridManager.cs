@@ -13,7 +13,7 @@ public class GridManager : MonoBehaviour
     {
         Vector3 worldPos = obj.transform.position;
         Vector3Int cellPos = grid.WorldToCell(worldPos);
-        Vector2Int gridPos = new Vector2Int(cellPos.x, cellPos.y);
+        Vector2Int gridPos = new(cellPos.x, cellPos.y);
         if(!gridObjects.ContainsKey(gridPos))
         {
             gridObjects[gridPos] = obj;
