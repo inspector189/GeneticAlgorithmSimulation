@@ -51,13 +51,7 @@ public class GeneticAlgorithm : MonoBehaviour
         {
             RemoveWolf(i);
         }
-        Debug.Log("Usunięto: " + (agents.Count - bestHalfAgentsCount) + " liczbę wilków");
         parents.AddRange(agents);
-        foreach(GeneticAgent parent in parents)
-        {
-            Debug.Log("Parent dodany do listy agentów: " + parent.gameObject.name);
-        }
-        Debug.Log("Łączna liczba parentów: " + parents.Count);
     }
     private GeneticAgent CreateChild(GeneticAgent firstParent, GeneticAgent secondParent)
     {
@@ -86,7 +80,7 @@ public class GeneticAlgorithm : MonoBehaviour
         positions.Add(position);
     }
     private void StartWolfAction(float actionTime)
-    {
+    {       
         foreach (GeneticAgent agent in agents)
         {
             agent.GetComponent<Wolf>().StartAction(actionTime);
@@ -155,8 +149,6 @@ public class GeneticAlgorithm : MonoBehaviour
             GeneticAgent secondChild = CreateChild(parent1, parent2);
             newGeneration.Add(firstChild);
             newGeneration.Add(secondChild);
-            Debug.Log("Dodano dziecko: " + i + " do nowej generacji: " + firstChild.gameObject.name + " " + secondChild.gameObject.name + " liczba dzieci to utworzenia" + childrenToCreate);
-            Debug.Log("Rodzic 1: " + parent1.name + " Rodzic 2: " + parent2.name);
         }
         agents.AddRange(newGeneration);
     }
@@ -171,7 +163,6 @@ public class GeneticAlgorithm : MonoBehaviour
                 counter++;
             }
         }
-        Debug.Log("Liczba zmutowanych osobników: " + counter);
     }
 
     private void NextEpoch()
@@ -179,7 +170,6 @@ public class GeneticAlgorithm : MonoBehaviour
         WolvesFitness();
         Crossover();
         Mutate();
-        Debug.Log(agents.Count + " Liczba agentów");
         epochsNum--;
     }
     #endregion
@@ -200,5 +190,4 @@ public class GeneticAlgorithm : MonoBehaviour
 
 /*
  2. Movement Order - jezeli dane pole jest wolne i dwa wilki chca na nie sie dostac to sprawdzamy ktory ma wiekszy ten movementOrder
- 3. UI  - przyspieszenie czasu
  */

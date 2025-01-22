@@ -69,7 +69,6 @@ public class GeneticAgent : MonoBehaviour
         {
             if(gene.Name == "Movement Range")
             {
-                Debug.Log(random.Next(gene.Min, gene.CurrentValue + 1));
                 return random.Next(gene.Min, gene.CurrentValue + 1);
             }
         }
