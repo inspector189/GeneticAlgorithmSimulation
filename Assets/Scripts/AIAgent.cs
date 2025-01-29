@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 
@@ -9,7 +10,7 @@ public class AIAgent : MonoBehaviour
     private GridManager gridManager;
     private void Start()
     {  
-        gridManager = FindFirstObjectByType<GridManager>();
+        gridManager = FindObjectOfType<GridManager>();
         if (gridManager != null)
         {
             gridManager.AddObjectToGrid(this);
@@ -22,17 +23,17 @@ public class AIAgent : MonoBehaviour
             gridManager.RemoveObjectFromGrid(this);
         }
     }
-    public void Move(Vector2Int direction)
+    public void Move()
     {
-        if (gridManager != null)
+        gridManager = FindObjectOfType<GridManager>();
+        Vector2Int currentGridPos = new(gridManager.Grid.WorldToCell(transform.position).x, gridManager.Grid.WorldToCell(transform.position).z);
+        Vector2Int targetPosition = gridManager.FindNearestFreePosition(currentGridPos, GetComponent<Wolf>());
+        if (targetPosition != currentGridPos)
         {
-            Vector3Int newPosition = gridManager.Grid.WorldToCell(transform.position + new Vector3(direction.x, 0, direction.y));
-            Vector2Int newPosVec2 = new(newPosition.x, newPosition.z);
-            if (gridManager.IsPositionEmpty(newPosVec2))
-            {
-                gridManager.UpdateObjectOnGrid(this, newPosVec2);
-                transform.position = new Vector3(newPosition.x, transform.position.y, newPosition.z);
-            }
+            gridManager.GetPositions().Add(currentGridPos);
+            gridManager.GetOccupiedPositions().Add(targetPosition);
+            GetComponent<Wolf>().SetTargetPosition(targetPosition, gridManager.GetOccupiedPositions());
+            gridManager.GetPositions().Remove(targetPosition);
         }
     }
     public Vector2Int GetPosition()
@@ -42,6 +43,19 @@ public class AIAgent : MonoBehaviour
             Vector3Int currentPosition = gridManager.Grid.WorldToCell(transform.position);
             return new Vector2Int(currentPosition.x, currentPosition.z);
         }
+
         return Vector2Int.zero;
+    }
+    public HashSet<Vector2Int> GetOccupiedPosition()
+    {
+        return gridManager.GetOccupiedPositions();
+    }
+    public GridManager GetGrid()
+    {
+        return gridManager;
+    }
+    public Vector3 GetTargetWorldPosition(Vector2Int targetPosition)
+    {
+        return GetGrid().Grid.CellToWorld(new Vector3Int(targetPosition.x, 0, targetPosition.y));
     }
 }

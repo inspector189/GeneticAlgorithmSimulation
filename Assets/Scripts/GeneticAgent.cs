@@ -8,21 +8,18 @@ public class GeneticAgent : MonoBehaviour
 {
     [SerializeField]
     private List<Gene> genes;
-    [SerializeField]
-    private GameObject wolfPrefab;
+    private Wolf wolf;
 
     [field: SerializeField]
-    public float Fitness { get; private set; } = 0;
+    public int Fitness { get ; private set; } = 0;
     private void Start()
     {
-        Color randomColor = new(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
-        Renderer wolfRenderer = this.GetComponent<Renderer>();
-        wolfRenderer.material.color = randomColor;
+        wolf = GetComponent<Wolf>();
     }
+
     public void EvaluateFitness()
     {
-        Renderer wolfRenderer = this.GetComponent<Renderer>();
-        Fitness = wolfRenderer.material.color.r + wolfRenderer.material.color.g + wolfRenderer.material.color.b;
+        Fitness = wolf.GetFoodNum();
     }
     public void RandomizeGenes()
     {
@@ -65,13 +62,11 @@ public class GeneticAgent : MonoBehaviour
     public int GetMovementRangeValue()
     {
         System.Random random = new();
-        foreach(Gene gene in genes)
-        {
-            if(gene.Name == "Movement Range")
-            {
-                return random.Next(gene.Min, gene.CurrentValue + 1);
-            }
-        }
-        return 1;
+        Gene movementRangeGene = GetGene("Movement Range");
+        return random.Next(movementRangeGene.Min, movementRangeGene.CurrentValue + 1);    
+    }
+    public Gene GetGene(string name)
+    {
+        return genes.Find(gene => gene.Name == name);
     }
 }

@@ -5,12 +5,17 @@ using UnityEngine;
 public class GeneticAlgorithm : MonoBehaviour
 {
     private List<GeneticAgent> agents;
+    private List<Sheep> sheeps = new();
     [SerializeField, Min(4)]
     private int populationSize = 100;
     [SerializeField, Min(1)]
     private int epochsNum = 10;
+    [SerializeField, Min(4)]
+    private int sheepPopulationSize = 10;
     [SerializeField]
     private GameObject wolfPrefab;
+    [SerializeField]
+    private GameObject sheepPrefab;
     [SerializeField]
     private GridManager gridManager;
     [SerializeField]
@@ -19,12 +24,12 @@ public class GeneticAlgorithm : MonoBehaviour
     private float actionTime = 5f;
     [SerializeField]
     private int numberActions = 5;
-    private SortedSet<Vector2Int> positions = new(new Vector2IntComparator()); 
 
     private void Start()
     {
-        AddPositions();
+        gridManager.AddPositions();
         InitializePopulation();
+        SpawnSheeps();
         StartCoroutine(StartEpochs());
     }
     #region ManagingWolves
@@ -35,7 +40,7 @@ public class GeneticAlgorithm : MonoBehaviour
         {
             GameObject wolf = Instantiate(wolfPrefab);
             GeneticAgent agent = wolf.GetComponent<GeneticAgent>();
-            wolf.transform.position = SetPosition();
+            wolf.transform.position = gridManager.SetPosition();
             agent.RandomizeGenes();
             agent.EvaluateFitness();
             agents.Add(agent);
@@ -47,12 +52,13 @@ public class GeneticAlgorithm : MonoBehaviour
         agents.Sort((a, b) => b.Fitness.CompareTo(a.Fitness));
 
         int bestHalfAgentsCount = agents.Count / 2;
-        for (int i = bestHalfAgentsCount; i < agents.Count; i++)
+        for (int i = agents.Count - 1; i >= bestHalfAgentsCount; i--)
         {
             RemoveWolf(i);
         }
         parents.AddRange(agents);
     }
+
     private GeneticAgent CreateChild(GeneticAgent firstParent, GeneticAgent secondParent)
     {
         GameObject firstWolf = Instantiate(firstParent.gameObject);
@@ -60,7 +66,17 @@ public class GeneticAlgorithm : MonoBehaviour
         childWolf.InheritGenes(firstParent, secondParent);
         childWolf.MutateGenes();
         childWolf.EvaluateFitness();
-        firstWolf.transform.position = SetPosition();
+
+        Vector2Int randomGridPos = gridManager.GetRandomAvailablePosition();
+        gridManager.GetPositions().Remove(randomGridPos);
+        gridManager.GetOccupiedPositions().Add(randomGridPos);
+
+        Wolf wolf = childWolf.GetComponent<Wolf>();
+        Vector2Int nearestFreePos = gridManager.FindNearestFreePosition(randomGridPos, wolf);
+
+        firstWolf.transform.position = gridManager.Grid.CellToWorld(new Vector3Int(nearestFreePos.x, 0, nearestFreePos.y));
+        gridManager.GetPositions().Remove(nearestFreePos);
+        gridManager.GetOccupiedPositions().Add(nearestFreePos);
         return childWolf;
     }
     private GeneticAgent SelectParentFromPool(List<GeneticAgent> selectedParents)
@@ -76,43 +92,25 @@ public class GeneticAlgorithm : MonoBehaviour
         Vector3Int gridPosition = gridManager.Grid.WorldToCell(worldPosition);
         Vector2Int position = new(gridPosition.x, gridPosition.z);
         Destroy(agents[index].gameObject);
+        gridManager.GetPositions().Add(position);
+        gridManager.GetOccupiedPositions().Remove(position);
         agents.RemoveAt(index);
-        positions.Add(position);
     }
     private void StartWolfAction(float actionTime)
-    {       
+    {
+        SortAgentsByMovementOrder(agents);
+
         foreach (GeneticAgent agent in agents)
         {
             agent.GetComponent<Wolf>().StartAction(actionTime);
         }
     }
-    #endregion
-    #region PositionsOnTheGrid
-    private void AddPositions()
+    private void SortAgentsByMovementOrder(List<GeneticAgent> agents)
     {
-        for (int x = 0; x < 10; x++)
-        {
-            for (int y = 0; y < 10; y++)
-            {
-                positions.Add(new Vector2Int(x, y));
-            }
-        }
-    }
-    private Vector3 SetPosition()
-    {
-        int index = Random.Range(0, positions.Count);
-        foreach (Vector2Int position in positions)
-        {
-            if (index == 0)
-            {
-                positions.Remove(position);
-                return gridManager.Grid.CellToWorld(new Vector3Int(position.x, 0, position.y));
-            }
-            index--;
-        }
-        return default;
+        agents.Sort((a, b) => b.GetGene("Movement Order").CurrentValue.CompareTo(a.GetGene("Movement Order").CurrentValue));
     }
     #endregion
+
     #region Epochs
     private IEnumerator StartEpochs()
     {
@@ -122,6 +120,7 @@ public class GeneticAlgorithm : MonoBehaviour
             {
                 StartWolfAction(actionTime);
                 yield return new WaitForSeconds(actionTime);
+                yield return new WaitForSeconds(3f);
             }
             NextEpoch();
         }
@@ -139,7 +138,7 @@ public class GeneticAlgorithm : MonoBehaviour
         List<GeneticAgent> newGeneration = geneticAgents;
         List<GeneticAgent> parents = new();
         SelectParents(parents);
-        int childrenToCreate = agents.Count / 2;
+        int childrenToCreate = parents.Count / 2;
         for (int i = 0; i < childrenToCreate; i++)
         {
             GeneticAgent parent1 = SelectParentFromPool(parents);
@@ -164,14 +163,41 @@ public class GeneticAlgorithm : MonoBehaviour
             }
         }
     }
-
     private void NextEpoch()
     {
-        WolvesFitness();
-        Crossover();
-        Mutate();
-        epochsNum--;
+        if(epochsNum >= 0)
+        {
+            WolvesFitness();
+            SpawnSheeps();
+            Crossover();
+            Mutate();
+            epochsNum--;
+        }
+        else
+        {
+            Time.timeScale = 0f;
+            Application.Quit();
+        }
     }
+    #endregion
+    #region Sheep
+    private void CreateSheepOnGrid()
+    {
+        Vector2Int randomPosition = gridManager.GetRandomAvailablePosition();
+        gridManager.GetPositions().Remove(randomPosition);
+        GameObject sheep = Instantiate(sheepPrefab);
+        sheep.transform.position = new Vector3(randomPosition.x, 0, randomPosition.y);
+        sheeps.Add(sheep.GetComponent<Sheep>());
+        gridManager.GetOccupiedPositions().Add(randomPosition);
+    }
+    private void SpawnSheeps()
+    {
+        for(int i = sheeps.Count; i < sheepPopulationSize; i++)
+        {
+            CreateSheepOnGrid();
+        }
+    }
+
     #endregion
     #region Comparator
     public class Vector2IntComparator : IComparer<Vector2Int>
@@ -188,6 +214,9 @@ public class GeneticAlgorithm : MonoBehaviour
     #endregion
 }
 
+
 /*
- 2. Movement Order - jezeli dane pole jest wolne i dwa wilki chca na nie sie dostac to sprawdzamy ktory ma wiekszy ten movementOrder
+    - wilki przeszukuja w swoim ViewRange czy jest owca jakas do której moga doskoczyc
+        - jezeli tak doskakuja do niej i ja zjadaja -> wzrasta nam Fitness i maleje z racji ze zrobily ruch o x kratek
+        - jezeli nie znajduja to sobie chodza w random miejscach 
  */

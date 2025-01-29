@@ -7,43 +7,42 @@ public class Wolf : AIAgent
 {
     private GeneticAgent agent;
     private Vector2Int targetPosition;
-
+    private int foodNum;
     private void Awake()
     {
         agent = GetComponent<GeneticAgent>();
     }
-     public Vector2Int GetTargetPosition()
+    public void SetTargetPosition(Vector2Int position, HashSet<Vector2Int> occupiedPositions)
     {
-        return targetPosition;
+        occupiedPositions.Remove(targetPosition);
+        targetPosition = position;
+        occupiedPositions.Add(targetPosition);
     }
     public void StartAction(float timeBudget)
     {
-        List<Vector2Int> enableMoves = new()
-        { 
-            new Vector2Int(0, agent.GetMovementRangeValue()), 
-            new Vector2Int(0, -agent.GetMovementRangeValue()), 
-            new Vector2Int(-agent.GetMovementRangeValue(), 0), 
-            new Vector2Int(agent.GetMovementRangeValue(), 0) 
-        };
-        
-           System.Random random = new();
-           int selectedIndex = random.Next(enableMoves.Count);
-           Vector2Int selectedMove = enableMoves[selectedIndex];
-           Vector3 targetPosition = transform.position + new Vector3(selectedMove.x, 0, selectedMove.y);
-           StartCoroutine(MoveOverTime(targetPosition, timeBudget));
+        Move();
+        StartCoroutine(MoveOverTime(GetTargetWorldPosition(targetPosition), timeBudget, GetOccupiedPosition()));
     }
-    private IEnumerator MoveOverTime(Vector3 targetPosition, float timeBudget)
+    private IEnumerator MoveOverTime(Vector3 targetPosition, float timeBudget, HashSet<Vector2Int> occupiedPositions)
     {
-        Vector3 startPosition = new(transform.position.x, transform.position.y, transform.position.z);
+        Vector3 startPosition = transform.position;
         float elapsedTime = 0f;
+        Vector2Int previousPosition = new(Mathf.RoundToInt(startPosition.x), Mathf.RoundToInt(startPosition.z));
+
         while (elapsedTime < timeBudget)
         {
             elapsedTime += Time.deltaTime;
-            float t = elapsedTime / timeBudget;
-            float easedT = Mathf.SmoothStep(0, 1, t);
-            transform.position = Vector3.Lerp(startPosition, targetPosition, easedT);
-            yield return null;             
+            transform.position = Vector3.Lerp(startPosition, targetPosition, Mathf.SmoothStep(0, 1, elapsedTime / timeBudget));
+            yield return null;
         }
-        bool isTrue = startPosition.Equals(transform.position);
+
+        Vector2Int newPosition = new(Mathf.RoundToInt(targetPosition.x), Mathf.RoundToInt(targetPosition.z));
+
+        occupiedPositions.Remove(previousPosition);
+        occupiedPositions.Add(newPosition);       
+    }
+    public int GetFoodNum()
+    {
+        return foodNum;
     }
 }
