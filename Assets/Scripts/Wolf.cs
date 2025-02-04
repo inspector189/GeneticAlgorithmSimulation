@@ -11,6 +11,15 @@ public class Wolf : AIAgent
     private void Awake()
     {
         agent = GetComponent<GeneticAgent>();
+        SetFoodNum();
+    }
+    public int GetFoodNum()
+    {
+        return foodNum;
+    }
+    private void SetFoodNum()
+    {
+        foodNum = agent.Fitness;
     }
     public void SetTargetPosition(Vector2Int position, HashSet<Vector2Int> occupiedPositions)
     {
@@ -41,8 +50,19 @@ public class Wolf : AIAgent
         occupiedPositions.Remove(previousPosition);
         occupiedPositions.Add(newPosition);       
     }
-    public int GetFoodNum()
+    public void CountFitnessAfterMove()
     {
-        return foodNum;
+        int cellsWalkedOver = CountCellsWolfWalkedOver(new(Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.z)), targetPosition);
+        if(cellsWalkedOver > 0)
+        {
+            foodNum -= cellsWalkedOver;
+        }    
+    }
+
+    public void CountFitnessAfterAttack()
+    {
+        int energyEff = agent.GetEnergyEfficiencyValue();
+        int percentageIncrease = energyEff / 100;
+        foodNum += foodNum * percentageIncrease;
     }
 }

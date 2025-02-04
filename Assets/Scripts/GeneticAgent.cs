@@ -11,12 +11,11 @@ public class GeneticAgent : MonoBehaviour
     private Wolf wolf;
 
     [field: SerializeField]
-    public int Fitness { get ; private set; } = 0;
-    private void Start()
+    public int Fitness { get ; private set; } = 100;     //get with body in SerializeField variable: https://developercommunity.visualstudio.com/t/CS8652-The-feature-field-keyword-is-cu/10802850?space=62&sort=newest
+    private void Awake()
     {
         wolf = GetComponent<Wolf>();
     }
-
     public void EvaluateFitness()
     {
         Fitness = wolf.GetFoodNum();
@@ -65,8 +64,21 @@ public class GeneticAgent : MonoBehaviour
         Gene movementRangeGene = GetGene("Movement Range");
         return random.Next(movementRangeGene.Min, movementRangeGene.CurrentValue + 1);    
     }
+    public int GetViewRangeValue()
+    {
+        return GetGene("View Range").CurrentValue;
+    }
+
+    public int GetEnergyEfficiencyValue()
+    {
+        return GetGene("Energy Efficiency").CurrentValue;
+    }
     public Gene GetGene(string name)
     {
         return genes.Find(gene => gene.Name == name);
+    }
+    public bool IsWolfFitnessPositive()
+    {
+        return Fitness > 0;
     }
 }

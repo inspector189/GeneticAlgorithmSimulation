@@ -337,13 +337,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   populationSize: 8
   epochsNum: 10
-  sheepPopulationSize: 10
   wolfPrefab: {fileID: 1224259430}
-  sheepPrefab: {fileID: 1385922199}
   gridManager: {fileID: 285281825}
   mutationChance: 0.1
   actionTime: 2
   numberActions: 5
+  sheep: {fileID: 1385922202}
 --- !u!4 &364876938
 Transform:
   m_ObjectHideFlags: 0
@@ -1520,6 +1519,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 79fe2dd1eaf4ed343b2f98f5dbd43823, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sheepPopulationSize: 10
+  sheepPrefab: {fileID: 1385922199}
 --- !u!33 &1385922203
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -1613,11 +1614,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4151012684861495031, guid: 131bc3967c6be7347b02963652a75260, type: 3}
       propertyPath: genes.Array.data[6].Max
-      value: 30
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 4151012684861495031, guid: 131bc3967c6be7347b02963652a75260, type: 3}
       propertyPath: genes.Array.data[6].Min
-      value: 10
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4151012684861495031, guid: 131bc3967c6be7347b02963652a75260, type: 3}
+      propertyPath: <Fitness>k__BackingField
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 4151012684861495031, guid: 131bc3967c6be7347b02963652a75260, type: 3}
       propertyPath: genes.Array.data[0].Name
@@ -1673,7 +1678,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4151012684861495031, guid: 131bc3967c6be7347b02963652a75260, type: 3}
       propertyPath: genes.Array.data[6].CurrentValue
-      value: 15
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5555189013796131144, guid: 131bc3967c6be7347b02963652a75260, type: 3}
       propertyPath: m_Name

@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -43,34 +43,68 @@ public class GridManager : MonoBehaviour
 
         return Vector2Int.zero;
     }
-    public void UpdateObjectOnGrid(AIAgent obj, Vector2Int newPosition)
-    {
-        Vector2Int lastPosition = obj.GetPosition();
-        if(gridObjects.ContainsKey(lastPosition) && gridObjects[lastPosition] == obj && !gridObjects.ContainsKey(newPosition))
-        {
-            RemoveObjectFromPosition(lastPosition);
-            AddObjectToGrid(obj);
-        }
-    }
-    public void RemoveObjectFromPosition(Vector2Int position)
-    {
-        if (gridObjects.ContainsKey(position))
-        {
-            gridObjects.Remove(position);
-        }
-    }
     public void RemoveObjectFromGrid(AIAgent obj)
     {
         gridObjects.Remove(obj.GetPosition());
-    }
-    public bool IsPositionEmpty(Vector2Int position)
-    {
-        return !gridObjects.ContainsKey(position);
     }
     public SortedSet<Vector2Int> GetPositions()
     {
         return positions;
     }
+    public Vector2Int FindNearestPosition(Vector2Int currentPos, Wolf wolf)
+    {
+        int viewRange = wolf.GetComponent<GeneticAgent>().GetViewRangeValue();
+
+        Vector2Int sheepPosition = FindNearestSheep(currentPos, viewRange);
+
+        if (sheepPosition != Vector2Int.zero)
+        {
+            return sheepPosition;
+        }
+        return FindNearestFreePosition(currentPos, wolf);
+    }
+    public bool IsSheepCaught(Wolf wolf)
+    {
+        Vector2Int wolfPosition = new(grid.WorldToCell(wolf.transform.position).x,
+                                      grid.WorldToCell(wolf.transform.position).z);
+
+        Sheep[] allSheep = FindObjectsOfType<Sheep>(); 
+
+        foreach (Sheep sheep in allSheep)
+        {
+            Vector2Int sheepPosition = new(grid.WorldToCell(sheep.transform.position).x,
+                                           grid.WorldToCell(sheep.transform.position).z);
+
+            if (sheepPosition == wolfPosition) 
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    private Vector2Int FindNearestSheep(Vector2Int currentPos, int viewRange)
+    {
+        Sheep[] allSheep = FindObjectsOfType<Sheep>(); 
+
+        Vector2Int nearestSheepPos = Vector2Int.zero;
+        int minDistance = int.MaxValue; 
+
+        foreach (Sheep sheep in allSheep)
+        {
+            Vector3Int cellPos = grid.WorldToCell(sheep.transform.position);
+            Vector2Int sheepGridPos = new(cellPos.x, cellPos.z);
+
+            int distance = Mathf.Abs(currentPos.x - sheepGridPos.x) + Mathf.Abs(currentPos.y - sheepGridPos.y);
+
+            if (distance <= viewRange && distance < minDistance)
+            {
+                nearestSheepPos = sheepGridPos;
+                minDistance = distance;
+            }
+        }
+        return nearestSheepPos;
+    }
+
     public Vector2Int FindNearestFreePosition(Vector2Int currentPos, Wolf wolf)
     {
         int movementRange = wolf.GetComponent<GeneticAgent>().GetMovementRangeValue();
@@ -92,7 +126,6 @@ public class GridManager : MonoBehaviour
                     searchQueue.Enqueue(neighbor);
             }
         }
-
         return currentPos;
     }
     private Vector2Int[] GetNeighbors(Vector2Int position, int movementRange)
