@@ -8,8 +8,7 @@ using UnityEngine.UIElements;
 
 public class AIAgent : MonoBehaviour
 {
-    private GridManager gridManager;
-    private bool isAttackingSheep = false;
+    public GridManager gridManager;
     private void Awake()
     {
         gridManager = FindObjectOfType<GridManager>();
@@ -24,11 +23,12 @@ public class AIAgent : MonoBehaviour
     public void Move()
     {
         gridManager = FindObjectOfType<GridManager>();
-        Vector2Int currentGridPos = new(gridManager.Grid.WorldToCell(transform.position).x, gridManager.Grid.WorldToCell(transform.position).z);
+        Vector2Int currentGridPos = GetPosition();
         Vector2Int targetPosition = gridManager.FindNearestPosition(currentGridPos, GetComponent<Wolf>());
-        if(gridManager.IsSheepCaught(GetComponent<Wolf>()))
+        if (gridManager.IsSheepCaught(GetComponent<Wolf>()))
         {
-            AttackSheep(currentGridPos);
+            GetComponent<Wolf>().AttackSheep(currentGridPos);
+            targetPosition = gridManager.FindNearestPosition(currentGridPos, GetComponent<Wolf>());
         }
         if (targetPosition != currentGridPos)
         {
@@ -77,30 +77,6 @@ public class AIAgent : MonoBehaviour
     public Vector3 GetTargetWorldPosition(Vector2Int targetPosition)
     {
         return GetGrid().Grid.CellToWorld(new Vector3Int(targetPosition.x, 0, targetPosition.y));
-    }
-    private void AttackSheep(Vector2Int wolfPosition)
-    {
-        if (!gridManager.IsSheepCaught(GetComponent<Wolf>())) return;
-
-        List<Sheep> allSheep = new List<Sheep>(FindObjectsOfType<Sheep>());
-
-        foreach (Sheep sheep in allSheep)
-        {
-            Vector2Int sheepPosition = new(gridManager.Grid.WorldToCell(sheep.transform.position).x,
-                                           gridManager.Grid.WorldToCell(sheep.transform.position).z);
-
-            if (sheepPosition == wolfPosition && !isAttackingSheep) 
-            {
-                isAttackingSheep = true; 
-                sheep.RemoveSheep(sheep);
-                sheep.CreateSheepOnGrid();
-                GetComponent<Wolf>().CountFitnessAfterAttack();
-                Move();
-
-                break;
-            }
-        }
-        isAttackingSheep = false;
     }
 
 }

@@ -9,6 +9,9 @@ public class GridManager : MonoBehaviour
     private Dictionary<Vector2Int, AIAgent> gridObjects = new();
     [SerializeField]
     private Grid grid;
+    private Dictionary<Vector2Int, Wolf> reservedCells = new Dictionary<Vector2Int, Wolf>();
+    private Dictionary<Sheep, Wolf> reservedSheep = new Dictionary<Sheep, Wolf>();
+
     public Grid Grid => grid;
     private SortedSet<Vector2Int> positions = new(new Vector2IntComparator());
     private HashSet<Vector2Int> occupiedPositions = new();
@@ -22,7 +25,7 @@ public class GridManager : MonoBehaviour
         Vector3 worldPos = obj.transform.position;
         Vector3Int cellPos = grid.WorldToCell(worldPos);
         Vector2Int gridPos = new(cellPos.x, cellPos.y);
-        if(!gridObjects.ContainsKey(gridPos))
+        if (!gridObjects.ContainsKey(gridPos))
         {
             gridObjects[gridPos] = obj;
             return true;
@@ -55,92 +58,106 @@ public class GridManager : MonoBehaviour
     {
         int viewRange = wolf.GetComponent<GeneticAgent>().GetViewRangeValue();
 
-        Vector2Int sheepPosition = FindNearestSheep(currentPos, viewRange);
+        Vector2Int sheepPosition = FindNearestSheep(currentPos, viewRange, wolf, viewRange);
 
-        if (sheepPosition != Vector2Int.zero)
+        if (sheepPosition != Vector2Int.zero && wolf.CanAttack())
         {
-            return sheepPosition;
+            Vector2Int reserved = TryReserveCell(wolf, sheepPosition);
+            if (reserved != Vector2Int.zero)
+                return reserved;
         }
-        return FindNearestFreePosition(currentPos, wolf);
+        Vector2Int freePos = FindNearestFreePosition(currentPos, wolf);
+        Vector2Int reservedFree = TryReserveCell(wolf, freePos);
+        if (reservedFree != Vector2Int.zero)
+            return reservedFree;
+        return freePos;
     }
     public bool IsSheepCaught(Wolf wolf)
     {
         Vector2Int wolfPosition = new(grid.WorldToCell(wolf.transform.position).x,
                                       grid.WorldToCell(wolf.transform.position).z);
 
-        Sheep[] allSheep = FindObjectsOfType<Sheep>(); 
+        Sheep[] allSheep = FindObjectsOfType<Sheep>();
 
         foreach (Sheep sheep in allSheep)
         {
             Vector2Int sheepPosition = new(grid.WorldToCell(sheep.transform.position).x,
                                            grid.WorldToCell(sheep.transform.position).z);
 
-            if (sheepPosition == wolfPosition) 
+            if (sheepPosition == wolfPosition)
             {
                 return true;
             }
         }
         return false;
     }
-    private Vector2Int FindNearestSheep(Vector2Int currentPos, int viewRange)
+    //przeszukiiwanie owiec w okręgu
+    private Vector2Int FindNearestSheep(Vector2Int currentPos, int baseViewRange, Wolf wolf, int effectiveBase)
     {
-        Sheep[] allSheep = FindObjectsOfType<Sheep>(); 
+        Sheep[] allSheep = FindObjectsOfType<Sheep>();
 
         Vector2Int nearestSheepPos = Vector2Int.zero;
-        int minDistance = int.MaxValue; 
+        Sheep candidateSheep = null;
+        float minDistance = float.MaxValue;
 
         foreach (Sheep sheep in allSheep)
         {
+            if (sheep.IsUnderAttack)
+                continue;
+
             Vector3Int cellPos = grid.WorldToCell(sheep.transform.position);
-            Vector2Int sheepGridPos = new(cellPos.x, cellPos.z);
+            Vector2Int sheepGridPos = new Vector2Int(cellPos.x, cellPos.z);
+            float distance = Vector2Int.Distance(currentPos, sheepGridPos);
 
-            int distance = Mathf.Abs(currentPos.x - sheepGridPos.x) + Mathf.Abs(currentPos.y - sheepGridPos.y);
-
-            if (distance <= viewRange && distance < minDistance)
+            if (distance <= baseViewRange && distance < minDistance)
             {
-                nearestSheepPos = sheepGridPos;
                 minDistance = distance;
+                candidateSheep = sheep;
+                nearestSheepPos = sheepGridPos;
             }
         }
+
+        if (candidateSheep != null)
+        {
+            ReserveSheep(candidateSheep, wolf, nearestSheepPos);
+        }
+
         return nearestSheepPos;
     }
-
+    //przeszukiwanie wolnych miejsc w prostokącie 
     public Vector2Int FindNearestFreePosition(Vector2Int currentPos, Wolf wolf)
     {
         int movementRange = wolf.GetComponent<GeneticAgent>().GetMovementRangeValue();
 
         Queue<Vector2Int> searchQueue = new();
         HashSet<Vector2Int> visited = new() { currentPos };
-        searchQueue.Enqueue(currentPos);
 
-        while (searchQueue.Count > 0)
+        for (int dx = -movementRange; dx <= movementRange; dx++)
         {
-            Vector2Int position = searchQueue.Dequeue();
-
-            if (positions.Contains(position) && !occupiedPositions.Contains(position))
-                return position;
-
-            foreach (Vector2Int neighbor in GetNeighbors(position, movementRange))
+            for (int dy = -movementRange; dy <= movementRange; dy++)
             {
-                if (visited.Add(neighbor) && positions.Contains(neighbor))
-                    searchQueue.Enqueue(neighbor);
+                Vector2Int neighbor = new(currentPos.x + dx, currentPos.y + dy);
+
+                if (positions.Contains(neighbor) && !occupiedPositions.Contains(neighbor) && visited.Add(neighbor))
+                {
+                    return neighbor; 
+                }
             }
         }
         return currentPos;
     }
-    private Vector2Int[] GetNeighbors(Vector2Int position, int movementRange)
+    public Dictionary<Sheep, Wolf> GetReservedSheeps()
     {
-        return new Vector2Int[]
-        {
-            new(position.x + movementRange, position.y),
-            new(position.x - movementRange, position.y),
-            new(position.x, position.y + movementRange),
-            new(position.x, position.y - movementRange)
-        };
+        return reservedSheep;
     }
+
     public HashSet<Vector2Int> GetOccupiedPositions()
     {
         return occupiedPositions;
+    }
+    public Dictionary<Vector2Int, Wolf> GetReservedCells()
+    {
+        return reservedCells;
     }
     public void AddPositions()
     {
@@ -158,4 +175,74 @@ public class GridManager : MonoBehaviour
         positions.Remove(randomGridPos);
         return Grid.CellToWorld(new Vector3Int(randomGridPos.x, 0, randomGridPos.y));
     }
+    private Vector2Int TryReserveCell(Wolf wolf, Vector2Int candidate)
+    {
+        if(!reservedCells.ContainsKey(candidate))
+        {
+            reservedCells[candidate] = wolf;
+            return candidate;
+        }
+        else
+        {
+            Wolf reservedWolf = reservedCells[candidate];
+            int currentOrder = wolf.GetComponent<GeneticAgent>().GetGene("Movement Order").CurrentValue;
+            int reservedOrder = reservedWolf.GetComponent<GeneticAgent>().GetGene("Movement Order").CurrentValue;
+            if(currentOrder > reservedOrder)
+            {
+                reservedCells[candidate] = wolf;
+
+                return candidate;
+            }
+            else if(currentOrder == reservedOrder)
+            {
+                if(Random.value < 0.5f)
+                {
+                    reservedCells[candidate] = wolf;
+                    return candidate;
+                }
+            }
+            return Vector2Int.zero;
+        }
+    }
+    private void ReserveSheep(Sheep candidateSheep, Wolf wolf, Vector2Int nearestSheepPos)
+    {
+        if (!reservedSheep.ContainsKey(candidateSheep))
+        {
+            reservedSheep[candidateSheep] = wolf;
+        }
+        else
+        {
+            int currentWolfOrder = wolf.GetComponent<GeneticAgent>().GetGene("Movement Order").CurrentValue;
+            int reservedWolfOrder = reservedSheep[candidateSheep].GetComponent<GeneticAgent>().GetGene("Movement Order").CurrentValue;
+
+            if (currentWolfOrder > reservedWolfOrder)
+            {
+                reservedSheep[candidateSheep] = wolf;
+            }
+            else if (currentWolfOrder == reservedWolfOrder)
+            {
+                if (Random.value < 0.5f)
+                {
+                    reservedSheep[candidateSheep] = wolf;
+                }
+                else
+                {
+                    candidateSheep = null;
+                    nearestSheepPos = Vector2Int.zero;
+                }
+            }
+            else
+            {
+                candidateSheep = null;
+                nearestSheepPos = Vector2Int.zero;
+            }
+        }
+    }
 }
+/*
+    UI - tabelka z informacjami o genach danego wilka
+     //zrobic to prostokątem a nie przeszukiwaniem wszerz -
+    //i z tego prostokatu gridManager zwraca nam liste owiec ktore sie w nim znajduja -
+    //i jezeli owca ma boola ze jest atakowana to wtedy szukamy randomowej innej ktora nie ma
+ 
+ */
