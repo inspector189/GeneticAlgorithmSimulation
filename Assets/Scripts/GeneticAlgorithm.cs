@@ -94,7 +94,7 @@ public class GeneticAlgorithm : MonoBehaviour
 
     private GeneticAgent CreateChild(GeneticAgent firstParent, GeneticAgent secondParent)
     {
-        GameObject firstWolf = Instantiate(firstParent.gameObject);
+        GameObject firstWolf = Instantiate(firstParent.gameObject, wolvesParent);
         GeneticAgent childWolf = firstWolf.GetComponent<GeneticAgent>();
         childWolf.InheritGenes(firstParent, secondParent);
         childWolf.MutateGenes();

@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.5711552, g: 0.6367183, b: 0.8018868, a: 1}
-  m_SkyboxMaterial: {fileID: 2100000, guid: efd1c33efd2d58340b88804268e6833f, type: 2}
+  m_SkyboxMaterial: {fileID: 2100000, guid: 3f4e8a1cb03afbe4fa5811dca6e71eca, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -644,11 +644,11 @@ Light:
   m_Type: 1
   m_Shape: 0
   m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
-  m_Intensity: 1
+  m_Intensity: 0.35
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
-  m_CookieSize: 10
+  m_CookieSize: 50
   m_Shadows:
     m_Type: 2
     m_Resolution: -1
@@ -702,13 +702,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 705507993}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
-  m_LocalPosition: {x: 0, y: 3, z: 0}
+  m_LocalRotation: {x: 0.96125793, y: -0.08049461, z: 0.069782525, w: 0.2542324}
+  m_LocalPosition: {x: 0, y: 327, z: 1673}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+  m_LocalEulerAnglesHint: {x: 30, y: -186.18, z: -172.084}
 --- !u!1 &874167227
 GameObject:
   m_ObjectHideFlags: 0
@@ -1212,13 +1212,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.23964354, y: -0.04590589, z: 0.0016492995, w: 0.96977365}
-  m_LocalPosition: {x: 1.48, y: 10.2, z: -20.42}
+  m_LocalRotation: {x: 0.12447147, y: -0.045397215, z: 0.007011832, w: 0.9911594}
+  m_LocalPosition: {x: 44.1, y: 10.2, z: -20.42}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 27.707, y: -5.72, z: -1.217}
+  m_LocalEulerAnglesHint: {x: 14.322, y: -5.226, z: 0.154}
 --- !u!114 &963194229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1232,6 +1232,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 0.1
+  currentXRotation: 30
+  currentYRotation: -30
+  rotationSpeed: 1.5
+  moveSpeed: 5
 --- !u!1 &1127709774
 GameObject:
   m_ObjectHideFlags: 0
