@@ -24,7 +24,7 @@ public class GridManager : MonoBehaviour
     {
         Vector3 worldPos = obj.transform.position;
         Vector3Int cellPos = grid.WorldToCell(worldPos);
-        Vector2Int gridPos = new(cellPos.x, cellPos.y);
+        Vector2Int gridPos = new(cellPos.x, cellPos.z);
         if (!gridObjects.ContainsKey(gridPos))
         {
             gridObjects[gridPos] = obj;
@@ -128,8 +128,7 @@ public class GridManager : MonoBehaviour
     public Vector2Int FindNearestFreePosition(Vector2Int currentPos, Wolf wolf)
     {
         int movementRange = wolf.GetComponent<GeneticAgent>().GetMovementRangeValue();
-
-        Queue<Vector2Int> searchQueue = new();
+        List<Vector2Int> candidates = new List<Vector2Int>();
         HashSet<Vector2Int> visited = new() { currentPos };
 
         for (int dx = -movementRange; dx <= movementRange; dx++)
@@ -140,9 +139,14 @@ public class GridManager : MonoBehaviour
 
                 if (positions.Contains(neighbor) && !occupiedPositions.Contains(neighbor) && visited.Add(neighbor))
                 {
-                    return neighbor; 
+                    candidates.Add(neighbor);
                 }
             }
+        }
+        if (candidates.Count > 0)
+        {
+            int randomIndex = Random.Range(0, candidates.Count);
+            return candidates[randomIndex];
         }
         return currentPos;
     }

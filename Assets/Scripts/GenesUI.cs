@@ -74,19 +74,6 @@ public class GenesUI : MonoBehaviour
     {
         return (wolf.GetFoodNum()).ToString();
     }
-    private static string ToHexString(Color color)
-    {
-        int r = Mathf.RoundToInt(color.r * 255f);
-        int g = Mathf.RoundToInt(color.g * 255f);
-        int b = Mathf.RoundToInt(color.b * 255f);
-
-        return $"#{r:X2}{g:X2}{b:X2}";
-    }
-    private string GetWolfColor(Wolf wolf)
-    {
-        string wolfColor = ToHexString(wolf.GetWolfColor());
-        return wolfColor;
-    }
     private string GetWolfGenesInfo(Wolf wolf)
     {
         GeneticAgent geneticAgent = wolf.GetComponent<GeneticAgent>();
@@ -98,7 +85,6 @@ public class GenesUI : MonoBehaviour
             genesInfo += $"{gene.Name}: {gene.CurrentValue}\n";
         }
         genesInfo += "Fitness: " + GetWolfFitness(wolf);
-        genesInfo += "Color: " + GetWolfColor(wolf);
         return genesInfo;
     }
 }

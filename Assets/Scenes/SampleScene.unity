@@ -335,9 +335,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37a9d74e1c317924c8dea3756c95ff45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  populationSize: 75
+  populationSize: 100
   epochsNum: 10
-  sheepInitPopulationSize: 25
+  sheepInitPopulationSize: 50
   wolfPrefab: {fileID: 1224259430}
   gridManager: {fileID: 285281825}
   mutationChance: 0.1
@@ -1595,7 +1595,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1201378610}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 71fe343e968a7404bbc0d14aa2682a40, type: 3}
   m_Name: 
