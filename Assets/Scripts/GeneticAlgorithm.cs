@@ -28,6 +28,10 @@ public class GeneticAlgorithm : MonoBehaviour
     private List<Sheep> sheeps = new();
     [SerializeField]
     private GameObject sheepPrefab;
+    [SerializeField]
+    private Transform wolvesParent;
+    [SerializeField]
+    private Transform sheepsParent;
 
     private void Start()
     {
@@ -41,7 +45,7 @@ public class GeneticAlgorithm : MonoBehaviour
         agents = new List<GeneticAgent>();
         for (int i = 0; i < populationSize; i++)
         {
-            GameObject wolf = Instantiate(wolfPrefab);
+            GameObject wolf = Instantiate(wolfPrefab, wolvesParent);
             GeneticAgent agent = wolf.GetComponent<GeneticAgent>();
             wolf.transform.position = gridManager.SetPosition();
             agent.RandomizeGenes();
@@ -66,7 +70,7 @@ public class GeneticAlgorithm : MonoBehaviour
         {
             gridManager.GetPositions().Remove(randomPosition);
             sheepPrefab.SetActive(false);
-            GameObject sheep = Instantiate(sheepPrefab);
+            GameObject sheep = Instantiate(sheepPrefab, sheepsParent);
             sheep.SetActive(true);
             sheep.transform.position = new Vector3(randomPosition.x, 0, randomPosition.y);
             Sheep sheepComponent = sheep.GetComponent<Sheep>();

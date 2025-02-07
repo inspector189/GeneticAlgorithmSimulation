@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 [RequireComponent(typeof(GeneticAgent))]
 public class Wolf : AIAgent
 {
@@ -12,11 +13,29 @@ public class Wolf : AIAgent
     private GeneticAlgorithm algorithm;
     private int attacksThisEpoch = 0;
     private Color wolfColor;
+    [SerializeField]
+    private float rotationSpeed = 5.0f;
     private void Start()
     {
         wolfColor = CalculateColor();
-        Renderer wolfRenderer = GetComponent<Renderer>();
-        wolfRenderer.material.color = wolfColor;
+        ApplyColorToAllParts(wolfColor);
+    }
+
+    private void ApplyColorToAllParts(Color color)
+    {
+        Renderer bodyRenderer = transform.Find("Body").GetComponent<Renderer>();
+        bodyRenderer.material.color = color;
+    }
+    private void Update()
+    {
+        Vector3 direction = (GetTargetWorldPosition(targetPosition) - transform.position).normalized;
+        if(direction != Vector3.zero)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            Quaternion offsetRotation = Quaternion.Euler(0, 90, 0);
+            targetRotation *= offsetRotation;
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
+        }
     }
     private void Awake()
     {

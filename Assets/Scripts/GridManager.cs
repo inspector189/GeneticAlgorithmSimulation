@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UIElements;
 using static GeneticAlgorithm;
 
@@ -59,17 +61,20 @@ public class GridManager : MonoBehaviour
         int viewRange = wolf.GetComponent<GeneticAgent>().GetViewRangeValue();
 
         Vector2Int sheepPosition = FindNearestSheep(currentPos, viewRange, wolf, viewRange);
-
         if (sheepPosition != Vector2Int.zero && wolf.CanAttack())
         {
             Vector2Int reserved = TryReserveCell(wolf, sheepPosition);
             if (reserved != Vector2Int.zero)
+            {
                 return reserved;
+            }
         }
         Vector2Int freePos = FindNearestFreePosition(currentPos, wolf);
         Vector2Int reservedFree = TryReserveCell(wolf, freePos);
         if (reservedFree != Vector2Int.zero)
+        {
             return reservedFree;
+        }
         return freePos;
     }
     public bool IsSheepCaught(Wolf wolf)
@@ -242,6 +247,15 @@ public class GridManager : MonoBehaviour
             }
         }
     }
+    public int GetGridWidth()
+    {
+        return gridWidth;
+    }
+    public int GetGridHeight()
+    {
+        return gridHeight;
+    }
+    
 }
 /*
     UI - tabelka z informacjami o genach danego wilka
