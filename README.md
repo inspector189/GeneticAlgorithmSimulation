@@ -89,6 +89,74 @@ Losowa zmiana od 0 do 2 genów:
 
 ---
 
+## Przykładowe typy wilków
+
+W trakcie symulacji zaobserwowano trzy dominujące archetypy, które wyłoniły się w wyniku ewolucji. Wszystkie charakteryzują się niskim Movement Range (1) i niskim Movement Order (1–2) — populacja ewoluowała w kierunku oszczędzania energii na ruchu.
+
+### 🟤 Sloth — oszczędny przetrwalnik
+
+Najmniej agresywny, przekazuje mało energii dzieciom — sam zostaje z największym zapasem. Średni View Range pozwala reagować na owce w pobliżu.
+
+| Gen | Wartość |
+|---|---|
+| Movement Range | 1 |
+| Movement Order | 1 |
+| View Range | 4 |
+| Frequency - aggressive | 3 |
+| % of energy transferred to children | 29% |
+
+**Strategia:** Minimalizuj koszty, atakuj tylko gdy musisz, zachowaj energię dla siebie.
+
+---
+
+### 🟡 Scout — dalekowzroczny pośrednik
+
+Największy View Range ze wszystkich trzech — widzi owce z daleka i planuje ruchy z wyprzedzeniem. Przekazuje więcej energii dzieciom niż Sloth, co sprzyja liczniejszemu potomstwu.
+
+| Gen | Wartość |
+|---|---|
+| Movement Range | 1 |
+| Movement Order | 2 |
+| View Range | 7 |
+| Frequency - aggressive | 3 |
+| % of energy transferred to children | 53% |
+
+**Strategia:** Patrz daleko, ruszaj się ostrożnie, inwestuj w potomstwo.
+
+---
+
+### 🔴 Cheetah — agresywny inwestor
+
+Najbardziej agresywny i przekazujący najwięcej energii dzieciom. Najsłabszy View Range — atakuje raczej na ślepo, licząc na bliski kontakt z owcą. Ryzykowna strategia przy małej liczbie owiec.
+
+| Gen | Wartość |
+|---|---|
+| Movement Range | 1 |
+| Movement Order | 1 |
+| View Range | 2 |
+| Frequency - aggressive | 4 |
+| % of energy transferred to children | 78% |
+
+**Strategia:** Atakuj często, rozmnażaj się intensywnie — wszystko albo nic.
+
+---
+
+### Porównanie
+
+| | 🟤 Sloth | 🟡 Scout | 🔴 Cheetah |
+|---|---|---|---|
+| Movement Range | 1 | 1 | 1 |
+| Movement Order | 1 | 2 | 1 |
+| View Range | 4 | 7 | 2 |
+| Frequency - aggressive | 3 | 3 | 4 |
+| % energy → children | 29% | 53% | 78% |
+| Przeżywalność | wysoka | średnia | niska–średnia |
+| Strategia | K-strategia | pośrednia | r-strategia |
+
+> Kluczowa obserwacja: cała populacja zeszła do Movement Range = 1. Koszt ruchu okazał się na tyle duży, że ewolucja faworyzowała wilki, które się prawie nie ruszają — różnicując się jedynie w agresywności i inwestycji w potomstwo.
+
+---
+
 ## Struktura plików
 
 ```
