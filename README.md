@@ -93,7 +93,7 @@ Losowa zmiana od 0 do 2 genów:
 
 W trakcie symulacji zaobserwowano trzy dominujące archetypy, które wyłoniły się w wyniku ewolucji. Wszystkie charakteryzują się niskim Movement Range (1) i niskim Movement Order (1–2) — populacja ewoluowała w kierunku oszczędzania energii na ruchu.
 
-### 🟤 Sloth — oszczędny przetrwalnik
+### 🟤 Sloth 
 
 Najmniej agresywny, przekazuje mało energii dzieciom — sam zostaje z największym zapasem. Średni View Range pozwala reagować na owce w pobliżu.
 
@@ -109,7 +109,7 @@ Najmniej agresywny, przekazuje mało energii dzieciom — sam zostaje z najwięk
 
 ---
 
-### 🟡 Scout — dalekowzroczny pośrednik
+### 🟡 Scout 
 
 Największy View Range ze wszystkich trzech — widzi owce z daleka i planuje ruchy z wyprzedzeniem. Przekazuje więcej energii dzieciom niż Sloth, co sprzyja liczniejszemu potomstwu.
 
@@ -125,7 +125,7 @@ Największy View Range ze wszystkich trzech — widzi owce z daleka i planuje ru
 
 ---
 
-### 🔴 Cheetah — agresywny inwestor
+### 🔴 Cheetah
 
 Najbardziej agresywny i przekazujący najwięcej energii dzieciom. Najsłabszy View Range — atakuje raczej na ślepo, licząc na bliski kontakt z owcą. Ryzykowna strategia przy małej liczbie owiec.
 
