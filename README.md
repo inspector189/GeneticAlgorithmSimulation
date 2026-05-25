@@ -2,6 +2,8 @@
 
 Symulacja algorytmu genetycznego w Unity, w której populacja wilków ewoluuje, aby efektywniej polować na owce. 
 
+https://www.youtube.com/watch?v=G6VqxGZNPT0
+
 ---
 
 ## Opis projektu
